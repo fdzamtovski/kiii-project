@@ -1,20 +1,26 @@
-version: '3.9'
-
+version: '2'
 services:
-  app:
-    build: .
+  h2:
+    container_name: 'h2'
+    hostname: 'h2'
+    image: 1000kit/h2
     ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: h2
-    depends_on:
-      - db
+      - "8081:8081"
+      - "1521:1521"
+    volumes:
+      - h2-data:/opt/h2-data
 
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: wp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: filip123
+  app:
+    container_name: 'spring-app'
+    image: openjdk:17-jdk-slim
     ports:
-      - "5433:5432"
+      - "8080:8080"  # Adjust this port as needed
+    volumes:
+      - ./target:/app
+    working_dir: /app
+    command: ["java", "-jar", "kiii-project-0.0.1-SNAPSHOT.jar"]
+    depends_on:
+      - h2
+
+volumes:
+  h2-data:
